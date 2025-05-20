@@ -1,6 +1,8 @@
+
+
+# Chuyển mode OK
 from pymavlink import mavutil
-import time
-import threading
+
 
 # Connect to the vehicle
 master = mavutil.mavlink_connection('COM4', baud=57600)

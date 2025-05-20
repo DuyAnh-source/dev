@@ -1,3 +1,5 @@
+# Đọc OK
+
 from pymavlink import mavutil
 
 # Thay đổi cổng COM hoặc ttyACMx tùy hệ điều hành

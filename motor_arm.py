@@ -1,3 +1,6 @@
+
+# Chạy ok nếu ready to fly
+
 from pymavlink import mavutil
 
 import time 
