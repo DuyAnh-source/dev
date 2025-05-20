@@ -14,6 +14,6 @@ master.mav.command_long_send(
     mavutil.mavlink.MAV_CMD_DO_SET_MODE,
     0,
     1,  # base_mode: MAV_MODE_FLAG_CUSTOM_MODE_ENABLED
-    6,  # custom_mode: 6 = OFFBOARD (với PX4)
+    1,  # custom_mode: 6 = OFFBOARD (với PX4)
     0, 0, 0, 0, 0
 )
