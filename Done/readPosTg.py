@@ -7,18 +7,10 @@ from pymavlink import mavutil
 connection = mavutil.mavlink_connection('COM4', baud=57600)
 # master = mavutil.mavlink_connection('udp:127.0.0.1:14550')  # Cho kết nối UDP
 
-# Đọc các thông điệp MAVLink
-message_types = set()
-
 # Đọc các thông điệp MAVLink và in ra tên các thông điệp một lần
 while True:
     msg = connection.recv_match()  # Nhận một thông điệp MAVLink
-
     if msg is not None:
-        message_type = msg.get_type()
-
-        # Kiểm tra nếu thông điệp này chưa được in ra
-        if message_type not in message_types:
-            # In ra tên của thông điệp và đánh dấu đã in
-            print(f"Received message: {message_type}")
-            message_types.add(message_type)  # Thêm vào set để theo dõi
+        msg_type = msg.get_type()
+        if msg_type == 'POSITION_TARGET_LOCAL_NED':
+            print(msg)

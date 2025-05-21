@@ -69,7 +69,16 @@ master.mav.command_long_send(
 # === 6. Gửi setpoint liên tục để PX4 bay lên (thrust > 0.5) ===
 print("📡 Đang gửi setpoint điều khiển...")
 for _ in range(100):
-    send_position_setpoint(0, 0, -1.5, yaw=0)  # thrust > 0.5 → bay lên
+    send_position_setpoint(3, 4, -5, yaw=0)  # thrust > 0.5 → bay lên
     time.sleep(0.05)             # 20Hz
+    msg = master.recv_match()  # Nhận một thông điệp MAVLink
+    if msg is not None:
+        message_type = msg.get_type()
+        if message_type == "LOCAL_POSITION_NED":
+            print(msg.x, msg.y, msg.z)
+        if  message_type == "POSITION_TARGET_LOCAL_NED":
+            print(msg)
+            # print(msg.x, msg.y, msg.z, msg.yaw)
+
 
 print("✅ Đã gửi xong setpoint điều khiển")
