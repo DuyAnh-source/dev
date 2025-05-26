@@ -72,5 +72,14 @@ print("📡 Đang gửi setpoint điều khiển...")
 for _ in range(100):
     send_attitude_setpoint(0.3)  # thrust > 0.5 → bay lên
     time.sleep(0.05)             # 20Hz
-
+    
+# Gửi lệnh DISARM
+master.mav.command_long_send(
+    master.target_system,
+    master.target_component,
+    mavutil.mavlink.MAV_CMD_COMPONENT_ARM_DISARM,  # Mã lệnh ARM/DISARM
+    0,      # confirmation
+    0,      # param1 = 0 để DISARM
+    0, 0, 0, 0, 0, 0
+)
 print("✅ Đã gửi xong setpoint điều khiển")

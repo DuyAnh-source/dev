@@ -1,8 +1,10 @@
 from pymavlink import mavutil
 import time
+import threading
 
 # === 1. Kết nối tới PX4 ===
-master = mavutil.mavlink_connection('COM4', baud=57600)
+master = mavutil.mavlink_connection('COM3', baud=2000000)
+# master = mavutil.mavlink_connection('COM4', baud=57600)
 master.wait_heartbeat()
 print("✅ Kết nối thành công với PX4")
 
@@ -24,22 +26,23 @@ def get_synced_time_boot_ms():
     return (t0_fc + elapsed_pc_ms) % 4294967295
 
 # === 2. Hàm gửi setpoint attitude ===
-def send_position_setpoint(x=0, y=0, z=-1, yaw=0):
-    master.mav.set_position_target_local_ned_send(
-        get_synced_time_boot_ms(),              # time_boot_ms
+def send_attitude_setpoint(thrust=0.6):
+    # Quaternion tương ứng attitude = 0 roll/pitch/yaw
+    q = [1, 0, 0, 0]
+    master.mav.set_attitude_target_send(
+        get_synced_time_boot_ms(),        # time_boot_us
         master.target_system,
         master.target_component,
-        mavutil.mavlink.MAV_FRAME_LOCAL_NED,    # hệ tọa độ Local NED
-        0b0000111111000111,                     # chỉ dùng vị trí x, y, z và yaw
-        x, y, z,                                # vị trí (Z âm là bay lên)
-        0, 0, 0,                                # vx, vy, vz
-        0, 0, 0,                                # ax, ay, az
-        yaw, 0                                  # yaw, yaw_rate
+        0b00000111,                    # ignore body rates & yaw
+        q,
+        0, 0, 0,                       # body rates
+        thrust                         # thrust từ 0.0 đến 1.0
     )
+
 # === 3. Gửi setpoint liên tục trong 1 giây để "mồi" OFFBOARD ===
 print("🚀 Gửi setpoint để PX4 chấp nhận OFFBOARD...")
 for _ in range(20):
-    send_position_setpoint(0, 0, -1.5, yaw=0)  # trung lập
+    send_attitude_setpoint(0.5)  # trung lập
     time.sleep(0.05)             # ~20Hz
 
 # === 4. Gửi lệnh chuyển sang OFFBOARD ===
@@ -67,18 +70,28 @@ master.mav.command_long_send(
 )
 
 # === 6. Gửi setpoint liên tục để PX4 bay lên (thrust > 0.5) ===
-print("📡 Đang gửi setpoint điều khiển...")
-for _ in range(100):
-    send_position_setpoint(3, 4, -5, yaw=0)  # thrust > 0.5 → bay lên
-    time.sleep(0.05)             # 20Hz
-    msg = master.recv_match()  # Nhận một thông điệp MAVLink
-    if msg is not None:
-        message_type = msg.get_type()
-        if message_type == "LOCAL_POSITION_NED":
-            print(msg.x, msg.y, msg.z)
-        if  message_type == "POSITION_TARGET_LOCAL_NED":
-            print(msg)
-            # print(msg.x, msg.y, msg.z, msg.yaw)
 
+def task1():
+    while True:
+        send_attitude_setpoint(0.3)  # thrust > 0.5 → bay lên
+        time.sleep(0.05)             # 20Hz
 
+def task2():
+    while True:
+        msg = master.recv_match(type='SERVO_OUTPUT_RAW', blocking=True, timeout=1)
+        if msg is not None:
+            print(msg.servo1_raw, msg.servo2_raw, msg.servo3_raw, msg.servo4_raw)
+
+t1 = threading.Thread(target=task1)
+t2 = threading.Thread(target=task2) 
+# Gửi lệnh DISARM
+master.mav.command_long_send(
+    master.target_system,
+    master.target_component,
+    mavutil.mavlink.MAV_CMD_COMPONENT_ARM_DISARM,  # Mã lệnh ARM/DISARM
+    0,      # confirmation
+    0,      # param1 = 0 để DISARM
+    0, 0, 0, 0, 0, 0
+)
 print("✅ Đã gửi xong setpoint điều khiển")
+
