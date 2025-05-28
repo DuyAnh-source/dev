@@ -78,12 +78,16 @@ def task1():
 
 def task2():
     while True:
-        msg = master.recv_match(type='SERVO_OUTPUT_RAW', blocking=True, timeout=1)
+        msg = master.recv_match(type='SERVO_OUTPUT_RAW', blocking=False, timeout=5)
         if msg is not None:
             print(msg.servo1_raw, msg.servo2_raw, msg.servo3_raw, msg.servo4_raw)
 
 t1 = threading.Thread(target=task1)
 t2 = threading.Thread(target=task2) 
+t1.start()
+t2.start()
+
+
 # Gửi lệnh DISARM
 master.mav.command_long_send(
     master.target_system,
@@ -93,5 +97,6 @@ master.mav.command_long_send(
     0,      # param1 = 0 để DISARM
     0, 0, 0, 0, 0, 0
 )
+
 print("✅ Đã gửi xong setpoint điều khiển")
 

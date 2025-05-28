@@ -4,8 +4,8 @@
 from pymavlink import mavutil
 
 # Tạo kết nối MAVLink qua serial hoặc UDP
-# connection = mavutil.mavlink_connection('COM4', baud=57600)
-connection = mavutil.mavlink_connection('COM3', baud=2000000)
+connection = mavutil.mavlink_connection('COM4', baud=57600)
+# connection = mavutil.mavlink_connection('COM3', baud=2000000)
 # master = mavutil.mavlink_connection('udp:127.0.0.1:14550')  # Cho kết nối UDP
 
 
