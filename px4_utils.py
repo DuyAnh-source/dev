@@ -98,7 +98,6 @@ def arm():
         1,  # param1 = 1 để ARM
         0, 0, 0, 0, 0, 0
     )
-    time.sleep(0.2)  # Đợi một chút để PX4 ARM thành công
 
 def disArm():
     global master
@@ -119,9 +118,11 @@ def get_servo_output_raw():
     msg = master.recv_match(type='SERVO_OUTPUT_RAW', blocking=False, timeout=5)
     if msg is not None:
         servo_output_raw = msg
-    else:
-        msg = servo_output_raw
-    return (msg.servo1_raw, msg.servo2_raw, msg.servo3_raw, msg.servo4_raw)
+        return (msg.servo1_raw, msg.servo2_raw, msg.servo3_raw, msg.servo4_raw)
+    if servo_output_raw is not None:
+        return (servo_output_raw.servo1_raw, servo_output_raw.servo2_raw,
+            servo_output_raw.servo3_raw, servo_output_raw.servo4_raw)
+    return None
 
 
 def get_attitude():
@@ -130,6 +131,6 @@ def get_attitude():
     msg = master.recv_match(type='ATTITUDE', blocking=False, timeout=5)
     if msg is not None:
         attitude = msg
-    else:
-        msg = attitude
-    return (msg.roll, msg.pitch, msg.yaw)
+        return msg
+    return attitude
+    

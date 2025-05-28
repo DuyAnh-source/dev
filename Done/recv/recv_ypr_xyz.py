@@ -17,8 +17,8 @@ while True:
 
     if msg_type == 'ATTITUDE':
         print(f"[ATTITUDE] Time: {msg.time_boot_ms} ms, Roll: {msg.roll:.2f}, Pitch: {msg.pitch:.2f}, Yaw: {msg.yaw:.2f}")
-    elif msg_type == 'LOCAL_POSITION_NED':
-        print(f"[LOCAL_POSITION_NED] Time: {msg.time_boot_ms} ms, x: {msg.x:.2f} m, y: {msg.y:.2f} m, z: {msg.z:.2f} m")
-        print(f"[LOCAL_POSITION_NED] Time: {msg.time_boot_ms} ms, vx: {msg.vx:.2f} m/s, vy: {msg.vy:.2f} m/s, vz: {msg.vz:.2f} m/s")
+    # elif msg_type == 'LOCAL_POSITION_NED':
+    #     print(f"[LOCAL_POSITION_NED] Time: {msg.time_boot_ms} ms, x: {msg.x:.2f} m, y: {msg.y:.2f} m, z: {msg.z:.2f} m")
+    #     print(f"[LOCAL_POSITION_NED] Time: {msg.time_boot_ms} ms, vx: {msg.vx:.2f} m/s, vy: {msg.vy:.2f} m/s, vz: {msg.vz:.2f} m/s")
 
     # Bạn có thể thêm các message khác tùy nhu cầu

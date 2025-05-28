@@ -6,7 +6,7 @@ from pynput import keyboard
 
 import px4_utils as px4
 
-thrust = 0.4  # Thrust > 0.5 để bay lên
+thrust = 0.2  # Thrust > 0.5 để bay lên
 thrust_step = 0.05  # Bước thay đổi thrust
 yaw_deg = 0.0  # Góc yaw, có thể thay đổi nếu cần
 pitch_deg = 0.0  # Góc pitch, có thể thay đổi nếu cần
@@ -14,8 +14,8 @@ roll_deg = 0.0  # Góc roll, có thể thay đổi nếu cần
 attitude_step = 0.1  # Bước thay đổi góc attitude
 
 # === 1. Kết nối tới PX4 ===
-master = mavutil.mavlink_connection('COM3', baud=2000000)
-# master = mavutil.mavlink_connection('COM4', baud=57600)
+# master = mavutil.mavlink_connection('COM3', baud=2000000)
+master = mavutil.mavlink_connection('COM4', baud=57600)
 master.wait_heartbeat()
 print("✅ Kết nối thành công với PX4")
 px4.init_globals(master)
@@ -35,17 +35,20 @@ stop_event = threading.Event()
 def task1():
     global thrust
     while not stop_event.is_set():
-        print(f"Thrust: {thrust:.2f}, Pitch: {pitch_deg}°, Roll: {roll_deg}°, Yaw: {yaw_deg}°")
         px4.send_attitude_setpoint(thrust)  # thrust > 0.5 → bay lên
         time.sleep(0.05)             # 20Hz
 
 def task2():
+    global thrust, pitch_deg, roll_deg, yaw_deg      
     while not stop_event.is_set():
         msg1 = px4.get_servo_output_raw()
         msg2 = px4.get_attitude()      
         if msg1 is not None and msg2 is not None:
-            print(f"🟢 Servo: {msg1}, Atitude: {msg2}")
-        time.sleep(0.1)
+            roll_feedback = msg2.roll * 180 / math.pi
+            pitch_feedback = msg2.pitch * 180 / math.pi
+            yaw_feedback = msg2.yaw * 180 / math.pi
+            print(f"Thrust: {thrust:.2f}, Pitch: {pitch_deg}°, Roll: {roll_deg}°, Yaw: {yaw_deg} Servo: {msg1}, Atitude: {roll_feedback:.2f}°, {pitch_feedback:.2f}°, {yaw_feedback:.2f}°")
+        time.sleep(0.2)
  
 def on_release(key):
     global thrust
@@ -62,7 +65,7 @@ def on_release(key):
         if thrust < 0:
             thrust = 0
         print(f"Giảm thrust: {thrust:.2f}")
-    elif key == keyboard.Key.enter:
+    elif key.char == 'q':
         thrust = thrust + thrust_step
         if thrust > 1.0:
             thrust = 1.0
@@ -85,11 +88,15 @@ def key_listener():
 
 t1 = threading.Thread(target=task1)
 t2 = threading.Thread(target=task2) 
-t_key = threading.Thread(target=key_listener)   
-
+t_key = threading.Thread(target=key_listener)    
 t1.start()
 t2.start()
 t_key.start()
 
-# disArm()
+try:
+    while not stop_event.is_set():
+        time.sleep(0.1)
+except KeyboardInterrupt:
+    print("🛑 Ctrl+C được nhấn.")
+    stop_event.set()
 
