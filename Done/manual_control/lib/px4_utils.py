@@ -19,13 +19,18 @@ def init_globals(m):
 def get_time_px4():
     global master
     global t0_fc, t0_pc
+
+    print("🔄 Đang chờ nhận LOCAL_POSITION_NED từ PX4...")
+
     msg = master.recv_match(type='LOCAL_POSITION_NED', blocking=True, timeout=5)
+
     if msg is None or not hasattr(msg, 'time_boot_ms'):
         print("❌ Không nhận được time_boot_ms từ FC. Thoát.")
         exit(1)
-        return msg.time_boot_ms
-    t0_pc = time.time()
 
+    t0_fc = msg.time_boot_ms              # Thời điểm PX4 gửi
+    t0_pc = time.time()                   # Thời điểm PC nhận
+    return t0_fc
 
 def get_synced_time_boot_ms():
     global t0_fc, t0_pc
@@ -118,10 +123,9 @@ def get_servo_output_raw():
     msg = master.recv_match(type='SERVO_OUTPUT_RAW', blocking=False, timeout=5)
     if msg is not None:
         servo_output_raw = msg
-        return (msg.servo1_raw, msg.servo2_raw, msg.servo3_raw, msg.servo4_raw)
+        return msg
     if servo_output_raw is not None:
-        return (servo_output_raw.servo1_raw, servo_output_raw.servo2_raw,
-            servo_output_raw.servo3_raw, servo_output_raw.servo4_raw)
+        return servo_output_raw
     return None
 
 
@@ -134,3 +138,16 @@ def get_attitude():
         return msg
     return attitude
     
+def position_mode():
+    global master
+    print("🛫 Chuyển sang position mode...")
+    master.mav.command_long_send(
+        master.target_system,
+        master.target_component,
+        176,
+        0,
+        1,  # base mode
+        3,  # custom mode
+        0, 0, 0, 0, 0
+    )
+    time.sleep(0.2)  # Đợi một chút để PX4 chuyển sang OFFBOARD

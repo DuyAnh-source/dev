@@ -4,10 +4,11 @@ import threading
 import math
 from pynput import keyboard
 
-import px4_utils as px4
+import lib.px4_utils as px4
+import lib.log_csv as log
 
-thrust = 0.2  # Thrust > 0.5 để bay lên
-thrust_step = 0.05  # Bước thay đổi thrust
+thrust = 0.05  # Thrust > 0.5 để bay lên
+thrust_step = 0.01  # Bước thay đổi thrust
 yaw_deg = 0.0  # Góc yaw, có thể thay đổi nếu cần
 pitch_deg = 0.0  # Góc pitch, có thể thay đổi nếu cần
 roll_deg = 0.0  # Góc roll, có thể thay đổi nếu cần
@@ -38,6 +39,7 @@ def task1():
         px4.send_attitude_setpoint(thrust)  # thrust > 0.5 → bay lên
         time.sleep(0.05)             # 20Hz
 
+log.init_log(px4.t0_pc)  # Khởi tạo file log
 def task2():
     global thrust, pitch_deg, roll_deg, yaw_deg      
     while not stop_event.is_set():
@@ -47,9 +49,12 @@ def task2():
             roll_feedback = msg2.roll * 180 / math.pi
             pitch_feedback = msg2.pitch * 180 / math.pi
             yaw_feedback = msg2.yaw * 180 / math.pi
-            print(f"Thrust: {thrust:.2f}, Pitch: {pitch_deg}°, Roll: {roll_deg}°, Yaw: {yaw_deg} Servo: {msg1}, Atitude: {roll_feedback:.2f}°, {pitch_feedback:.2f}°, {yaw_feedback:.2f}°")
+            print(f"Thrust: {thrust:.2f}, Pitch: {pitch_deg}°, Roll: {roll_deg}°, Yaw: {yaw_deg}, Servo: {msg1.servo1_raw}, {msg1.servo2_raw}, {msg1.servo3_raw}, {msg1.servo4_raw}, Atitude: {roll_feedback:.2f}°, {pitch_feedback:.2f}°, {yaw_feedback:.2f}°")
+            log.log_data(thrust, roll_deg, pitch_deg, yaw_deg,
+                         roll_feedback, pitch_feedback, yaw_feedback, msg1.servo1_raw,
+                         msg1.servo2_raw, msg1.servo1_raw, msg1.servo1_raw)
         time.sleep(0.2)
- 
+
 def on_release(key):
     global thrust
     global pitch_deg, roll_deg, yaw_deg
@@ -82,6 +87,9 @@ def on_release(key):
     elif key == keyboard.Key.right:
         roll_deg += attitude_step
         print(f"Tăng roll: {roll_deg}°")
+    else:
+        pass
+
 def key_listener():
     with keyboard.Listener(on_release=on_release) as listener:
         listener.join()
@@ -91,8 +99,7 @@ t2 = threading.Thread(target=task2)
 t_key = threading.Thread(target=key_listener)    
 t1.start()
 t2.start()
-t_key.start()
-
+t_key.start()    
 try:
     while not stop_event.is_set():
         time.sleep(0.1)

@@ -40,7 +40,7 @@ def send_attitude_setpoint(thrust=0.6):
 # === 3. Gửi setpoint liên tục trong 1 giây để "mồi" OFFBOARD ===
 print("🚀 Gửi setpoint để PX4 chấp nhận OFFBOARD...")
 for _ in range(20):
-    send_attitude_setpoint(0.5)  # trung lập
+    send_attitude_setpoint(0.1)  # trung lập
     time.sleep(0.05)             # ~20Hz
 
 # === 4. Gửi lệnh chuyển sang OFFBOARD ===
@@ -70,7 +70,7 @@ master.mav.command_long_send(
 # === 6. Gửi setpoint liên tục để PX4 bay lên (thrust > 0.5) ===
 print("📡 Đang gửi setpoint điều khiển...")
 for _ in range(100):
-    send_attitude_setpoint(0.3)  # thrust > 0.5 → bay lên
+    send_attitude_setpoint(0.1)  # thrust > 0.5 → bay lên
     time.sleep(0.05)             # 20Hz
     
 # Gửi lệnh DISARM
