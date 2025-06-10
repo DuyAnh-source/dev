@@ -1,3 +1,4 @@
+from pymavlink import mavutil
 import time
 import math
 from pynput import keyboard
@@ -15,6 +16,7 @@ def init_globals(m):
     global master
     master = m
 
+#  Lấy time_boot_ms gốc từ FC để đồng bộ
 def get_time_px4():
     global master
     global t0_fc, t0_pc
@@ -29,9 +31,6 @@ def get_time_px4():
 
     t0_fc = msg.time_boot_ms              # Thời điểm PX4 gửi
     t0_pc = time.time()                   # Thời điểm PC nhận
-
-    print(f"✅ time_boot_ms từ FC: {t0_fc} ms — Thời gian PC: {t0_pc:.3f} s")
-
     return t0_fc
 
 def get_synced_time_boot_ms():
@@ -77,7 +76,7 @@ def send_attitude_setpoint(thrust=0.1, roll_deg=0.0, pitch_deg=0.0, yaw_deg=0.0)
 
 def init_setpoint():
     for _ in range(20):
-        send_attitude_setpoint(0.5)  
+        send_attitude_setpoint(0.1)  
         time.sleep(0.05)             # ~20Hz
 
 def offboard_mode():
@@ -154,3 +153,21 @@ def position_mode():
     )
     time.sleep(0.2)  # Đợi một chút để PX4 chuyển sang OFFBOARD
 
+def land_mode():
+    global master
+    base_mode = 29
+    custom_mode = 4
+    custom_sub_mode = 6
+
+    master.mav.command_long_send(
+        master.target_system,
+        master.target_component,
+        mavutil.mavlink.MAV_CMD_DO_SET_MODE,
+        0,  # confirmation
+        base_mode,        # param1
+        custom_mode,      # param2
+        custom_sub_mode,  # param3
+        0, 0, 0, 0        # param4-7 unused
+    )
+
+    time.sleep(0.2)  # Đợi một chút để PX4 chuyển sang LAND mode

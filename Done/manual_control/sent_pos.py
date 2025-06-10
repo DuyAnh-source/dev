@@ -63,8 +63,10 @@ t2 = threading.Thread(target=thread_read_msg, name="read_msg")
 t1.start()
 t2.start()
   
-time.sleep(7)
+time.sleep(15)
 stop_event.set()
+px4.land_mode()
+
 t1.join()
 t2.join()
 
