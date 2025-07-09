@@ -24,7 +24,7 @@ def get_synced_time_boot_ms():
     return (t0_fc + elapsed_pc_ms) % 4294967295
 
 # === 2. Hàm gửi setpoint attitude ===
-def send_attitude_setpoint(thrust=0.6):
+def send_attitude_setpoint(thrust=0.1):
     # Quaternion tương ứng attitude = 0 roll/pitch/yaw
     q = [1, 0, 0, 0]
     master.mav.set_attitude_target_send(
@@ -67,10 +67,10 @@ master.mav.command_long_send(
     1, 0, 0, 0, 0, 0, 0
 )
 
-# === 6. Gửi setpoint liên tục để PX4 bay lên (thrust > 0.5) ===
-print("📡 Đang gửi setpoint điều khiển...")
+# === 6. Gửi setpoint liên tục 
+print("📡 Đang gửi setpoint điều khiển...") 
 for _ in range(100):
-    send_attitude_setpoint(0.05)  # thrust > 0.5 → bay lên
+    send_attitude_setpoint(0.1) 
     time.sleep(0.05)             # 20Hz
     
 # Gửi lệnh DISARM

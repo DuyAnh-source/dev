@@ -1,0 +1,17 @@
+2025 6 23
+    Kịch bản thí nghiệm:
+        0. Test trước hàm send_movement_pos_ned() bằng chương trình sent pos
+        1. Bay theo quỹ đạo đường thẳng bằng chương trình send trace
+        2. Bay theo vận tốc đặt bằng chương trình sent vel
+        3. test hàm đk và bay theo yaw bằng chương trình yaw_control
+    Kết luận:
+        0. sent pos OK
+        1. send trace OK
+        2. send vel không được, type mask 63, các vx,y,z: nan
+
+2025 6 30 
+    Kịch bản
+        Chạy yaw control đã sửa
+        Chạy kết hợp camera
+
+        

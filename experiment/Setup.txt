@@ -1,0 +1,15 @@
+Tiến hành thí nghiệm:
+    Setup:
+        1. Lắp ráp phần cứng
+            lắp 4 cánh quạt
+            chú ý chiều quay theo đúng frame
+            check kĩ xem chắc chắn chưa
+        2. Lắp pin
+            Kiểm tra xem PX có điện 
+            Kiểm tra GPS có ok
+        3. Kết nối k dây
+        4. setMode để chuyển qua OFFBOARD
+        5. Offboard arm để arm thử, 
+            các động cơ quay đúng
+ Thí nghiệm lấy dữ liệu:
+

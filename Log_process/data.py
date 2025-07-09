@@ -32,8 +32,8 @@ df_merge = pd.merge_asof(df_pos.sort_values('timestamp'), df_att.sort_values('ti
 df_merge['time_s'] = (df_merge['timestamp'] - df_merge['timestamp'].iloc[0]) / 1e6
 
 # === Lưu ra file CSV ===
-out_dir = "ulog_extracted"
-os.makedirs(out_dir, exist_ok=True)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+out_dir = os.path.join(current_dir, "ulog_extracted")
 df_merge[['time_s', 'x', 'y', 'z', 'vx', 'vy', 'vz',
           'roll_deg', 'pitch_deg', 'yaw_deg']].to_csv(
     os.path.join(out_dir, "trajectory_data.csv"), index=False)
